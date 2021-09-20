@@ -6,9 +6,9 @@ namespace Compiler
 {
     public class CompilerUIForm : Form
     {
-        private readonly TableLayoutPanel tableLayoutPanel1 = new()
+        private readonly TableLayoutPanel UILayout = new()
         {
-            Name = "tableLayoutPanel1",
+            Name = "LayoutPanel",
             ColumnCount = 2,
             ColumnStyles = {
                 new(SizeType.Percent, 75F),
@@ -51,7 +51,7 @@ namespace Compiler
         };
         private readonly Button CompileButton = new()
         {
-            Dock = System.Windows.Forms.DockStyle.Fill,
+            Dock = DockStyle.Fill,
             Location = new(3, 423),
             Name = "CompileButton",
             Size = new(794, 24),
@@ -61,7 +61,7 @@ namespace Compiler
         };
         private readonly Button OpenCodeFileButton = new()
         {
-            Dock = System.Windows.Forms.DockStyle.Fill,
+            Dock = DockStyle.Fill,
             Location = new(603, 3),
             Name = "OpenCodeFileButton",
             Size = new(194, 24),
@@ -87,48 +87,38 @@ namespace Compiler
 
         private void SetFormBaseVisuals()
         {
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleDimensions = new(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(800, 450);
-            Controls.Add(tableLayoutPanel1);
+            ClientSize = new(800, 450);
+            Controls.Add(UILayout);
             Name = "CompilerUIForm";
             Text = "Compiler";
         }
 
         private void RegisterHandlers()
         {
-            CompileButton.Click += new(CompileButton_Click);
-            OpenCodeFileButton.Click += new(OpenCodeFileButton_Click);
+            CompileButton.Click += CompileButton_Click;
+            OpenCodeFileButton.Click += OpenCodeFileButton_Click;
         }
 
         private void DoLayout()
         {
-            UpdateLayout(this, () =>
+            this.WithLayoutSuspended(form =>
             {
-                UpdateLayout(tableLayoutPanel1, () =>
+                form.UILayout.WithLayoutSuspended(panel =>
                 {
-                    new List<(Control control, int col, int row)>() {
-                        (CodeFilePath, 0, 0),
-                        (CompileResultListBox, 0, 1),
-                        (CompileButton, 0, 2),
-                        (OpenCodeFileButton, 1, 0),
-                    }.ForEach((ccr) => tableLayoutPanel1.Controls.Add(ccr.control, ccr.col, ccr.row));
-
-                    new List<(Control control, int colSpan)>() {
-                        (CompileResultListBox, 2),
-                        (CompileButton, 2)
-                    }.ForEach((ccs) => tableLayoutPanel1.SetColumnSpan(ccs.control, ccs.colSpan));
-
+                    panel.ApplyLayouts(new()
+                    {
+                        new(form.CodeFilePath, Col: 0, Row: 0, ColSpan: 1, RowSpan: 1),
+                        new(form.CompileResultListBox, Col: 0, Row: 1, ColSpan: 2, RowSpan: 1),
+                        new(form.CompileButton, Col: 0, Row: 2, ColSpan: 2, RowSpan: 1),
+                        new(form.OpenCodeFileButton, Col: 1, Row: 0, ColSpan: 1, RowSpan: 1),
+                    });
                 });
             });
         }
-
-        private static void UpdateLayout(Control control, Action action)
-        {
-            control.SuspendLayout();
-            action();
-            control.ResumeLayout();
-        }
+            
+        
 
         private void OpenCodeFileButton_Click(object? sender, EventArgs e)
         {
@@ -140,7 +130,7 @@ namespace Compiler
 
         private void CompileButton_Click(object? sender, EventArgs e)
         {
-            Compiler compiler = new();
+            _ = new Compiler();
         }
     }
 }
